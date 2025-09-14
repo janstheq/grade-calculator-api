@@ -52,6 +52,24 @@ def read_student(student_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Student not found")
     return db_student
 
+@app.delete("/students/{student_id}", response_model=schemas.DeleteResponse)
+def delete_student(student_id: int, db: Session = Depends(get_db)):
+    # Check if student exists
+    db_student = crud.get_student(db, student_id=student_id)
+    if not db_student:
+        raise HTTPException(status_code=404, detail="Student not found")
+
+    # Delete the student (this will also delete related courses and assignments due to CASCADE)
+    success = crud.delete_student(db, student_id=student_id)
+
+    if success:
+        return schemas.DeleteResponse(
+            success=True,
+            message=f"Student '{db_student.name}' and all related data deleted successfully",
+            deleted_id=student_id
+        )
+    else:
+        raise HTTPException(status_code=500, detail="Failed to delete student")
 
 # Course endpoints
 @app.post("/courses/", response_model=schemas.Course)
@@ -71,6 +89,25 @@ def read_course(course_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Course not found")
     return db_course
 
+
+@app.delete("/courses/{course_id}", response_model=schemas.DeleteResponse)
+def delete_course(course_id: int, db: Session = Depends(get_db)):
+    # Check if course exists
+    db_course = crud.get_course(db, course_id=course_id)
+    if not db_course:
+        raise HTTPException(status_code=404, detail="Course not found")
+
+    # Delete the course (this will also delete related assignments due to CASCADE)
+    success = crud.delete_course(db, course_id=course_id)
+
+    if success:
+        return schemas.DeleteResponse(
+            success=True,
+            message=f"Course '{db_course.name}' and all related assignments deleted successfully",
+            deleted_id=course_id
+        )
+    else:
+        raise HTTPException(status_code=500, detail="Failed to delete course")
 
 @app.get("/students/{student_id}/courses", response_model=List[schemas.Course])
 def read_student_courses(student_id: int, db: Session = Depends(get_db)):
