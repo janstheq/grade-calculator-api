@@ -81,6 +81,34 @@ def create_assignment(db: Session, assignment: schemas.AssignmentCreate):
     return db_assignment
 
 
+# Delete operations
+def delete_student(db: Session, student_id: int):
+    db_student = db.query(models.Student).filter(models.Student.id == student_id).first()
+    if db_student:
+        db.delete(db_student)
+        db.commit()
+        return True
+    return False
+
+
+def delete_course(db: Session, course_id: int):
+    db_course = db.query(models.Course).filter(models.Course.id == course_id).first()
+    if db_course:
+        db.delete(db_course)
+        db.commit()
+        return True
+    return False
+
+
+def delete_assignment(db: Session, assignment_id: int):
+    db_assignment = db.query(models.Assignment).filter(models.Assignment.id == assignment_id).first()
+    if db_assignment:
+        db.delete(db_assignment)
+        db.commit()
+        return True
+    return False
+
+
 # Grade calculation functions
 def calculate_course_grade(db: Session, course_id: int):
     assignments = get_assignments_by_course(db, course_id)

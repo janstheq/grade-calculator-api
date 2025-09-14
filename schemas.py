@@ -69,6 +69,12 @@ class Student(StudentBase):
 
 
 # Response Schemas
+class DeleteResponse(BaseModel):
+    success: bool
+    message: str
+    deleted_id: int
+
+
 class GPAResponse(BaseModel):
     student_id: int
     current_gpa: float

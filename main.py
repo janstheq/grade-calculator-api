@@ -101,6 +101,26 @@ def read_assignment(assignment_id: int, db: Session = Depends(get_db)):
     return db_assignment
 
 
+@app.delete("/assignments/{assignment_id}", response_model=schemas.DeleteResponse)
+def delete_assignment(assignment_id: int, db: Session = Depends(get_db)):
+    # Check if assignment exists
+    db_assignment = crud.get_assignment(db, assignment_id=assignment_id)
+    if not db_assignment:
+        raise HTTPException(status_code=404, detail="Assignment not found")
+
+    # Delete the assignment
+    success = crud.delete_assignment(db, assignment_id=assignment_id)
+
+    if success:
+        return schemas.DeleteResponse(
+            success=True,
+            message=f"Assignment '{db_assignment.name}' deleted successfully",
+            deleted_id=assignment_id
+        )
+    else:
+        raise HTTPException(status_code=500, detail="Failed to delete assignment")
+
+
 @app.get("/courses/{course_id}/assignments", response_model=List[schemas.Assignment])
 def read_course_assignments(course_id: int, db: Session = Depends(get_db)):
     db_course = crud.get_course(db, course_id=course_id)
